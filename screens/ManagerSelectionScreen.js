@@ -5,6 +5,8 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 
 export default function ManagerSelectionScreen({ navigation }) {
@@ -15,83 +17,104 @@ export default function ManagerSelectionScreen({ navigation }) {
     if (manager && supervisor) {
       navigation.navigate('FormSelector');
     } else {
-      alert('Please select both manager and supervisor');
+      alert('Please enter both ME-Engineer and QC-Engineer');
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Assign Manager & Supervisor</Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <Text style={styles.title}>Assign Engineers</Text>
+      <Text style={styles.subtitle}>Select ME-Engineer and QC-Engineer</Text>
 
-      <View style={styles.form}>
+      <View style={styles.card}>
+        <Text style={styles.label}>ME-Engineer</Text>
         <TextInput
-          placeholder="Manager Name or Email"
+          placeholder="Name or Email"
+          placeholderTextColor="#aaa"
           value={manager}
           onChangeText={setManager}
           style={styles.input}
-          placeholderTextColor="#888"
         />
+
+        <Text style={styles.label}>QC-Engineer</Text>
         <TextInput
-          placeholder="Supervisor Name or Email"
+          placeholder="Name or Email"
+          placeholderTextColor="#aaa"
           value={supervisor}
           onChangeText={setSupervisor}
           style={styles.input}
-          placeholderTextColor="#888"
         />
 
         <TouchableOpacity style={styles.button} onPress={handleProceed}>
           <Text style={styles.buttonText}>Proceed</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'white',
     justifyContent: 'center',
-    paddingHorizontal: 24,
+    alignItems: 'center',
+    padding: 20,
   },
-  header: {
-    fontSize: 22,
+  title: {
+    fontSize: 26,
     fontWeight: 'bold',
-    color: '#1c1c1e',
-    textAlign: 'center',
-    marginBottom: 40,
+    color: '#1c3a63',
+    marginBottom: 6,
   },
-  form: {
+  subtitle: {
+    fontSize: 16,
+    color: '#555',
+    marginBottom: 20,
+  },
+  card: {
     backgroundColor: '#fff',
-    borderRadius: 10,
-    paddingVertical: 24,
-    paddingHorizontal: 20,
+    width: '100%',
+    borderRadius: 16,
+    padding: 24,
     shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 10,
-    elevation: 2,
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 5,
+  },
+  label: {
+    fontSize: 14,
+    color: '#333',
+    marginBottom: 6,
+    marginTop: 10,
   },
   input: {
-    backgroundColor: '#f5f5f5',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
+    backgroundColor: '#f0f4f8',
     borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
     fontSize: 16,
-    marginBottom: 16,
+    marginBottom: 10,
+    borderColor: '#ddd',
+    borderWidth: 1,
   },
   button: {
     backgroundColor: '#1c3a63',
-    paddingVertical: 14,
     borderRadius: 10,
+    paddingVertical: 14,
+    marginTop: 16,
     alignItems: 'center',
-    marginTop: 8,
   },
   buttonText: {
     color: '#fff',
-    fontWeight: 'bold',
     fontSize: 16,
+    fontWeight: '600',
   },
 });
+
 
 

@@ -4,165 +4,196 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  FlatList,
   StyleSheet,
-  Alert,
+  ScrollView,
+  Modal,
+  Pressable,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-export default function FormBuilderScreen({ navigation }) {
-  const [formRows, setFormRows] = useState([{ id: 1, label: '', value: '' }]);
+export default function FormBuilderScreen({ route }) {
+  const { formName, columnStructure } = route.params;
 
-  const addRow = () => {
-    const newId = formRows.length + 1;
-    setFormRows([...formRows, { id: newId, label: '', value: '' }]);
+  const [tableData, setTableData] = useState(
+    columnStructure.map(colCount => Array(colCount).fill(''))
+  );
+  const [selectedCell, setSelectedCell] = useState({ row: null, col: null });
+  const [modalVisible, setModalVisible] = useState(false);
+  const [manualInput, setManualInput] = useState('');
+
+  const handleCellPress = (rowIdx, colIdx) => {
+    setSelectedCell({ row: rowIdx, col: colIdx });
+    setManualInput(tableData[rowIdx][colIdx]);
+    setModalVisible(true);
   };
 
-  const removeRow = (id) => {
-    setFormRows(formRows.filter((row) => row.id !== id));
-  };
-
-  const handleLabelChange = (id, text) => {
-    setFormRows(formRows.map((row) => (row.id === id ? { ...row, label: text } : row)));
-  };
-
-  const handleValueChange = (id, text) => {
-    setFormRows(formRows.map((row) => (row.id === id ? { ...row, value: text } : row)));
-  };
-
-  const handleSave = () => {
-    console.log('Form Data:', formRows);
-    Alert.alert('Form saved', 'Form data has been captured.');
-    navigation.navigate('Review', { formData: formRows });
+  const handleInput = value => {
+    const newData = [...tableData];
+    newData[selectedCell.row][selectedCell.col] = value;
+    setTableData(newData);
+    setModalVisible(false);
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Create Inspection Form</Text>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>{formName}</Text>
 
-      <FlatList
-        data={formRows}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.row}>
-            <TextInput
-              style={styles.input}
-              placeholder="Label (e.g. Part No)"
-              placeholderTextColor="#888"
-              value={item.label}
-              onChangeText={(text) => handleLabelChange(item.id, text)}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Value (e.g. 01234)"
-              placeholderTextColor="#888"
-              value={item.value}
-              onChangeText={(text) => handleValueChange(item.id, text)}
-            />
-            <TouchableOpacity onPress={() => removeRow(item.id)}>
-              <Text style={styles.remove}>❌</Text>
-            </TouchableOpacity>
+      <View style={styles.table}>
+        {tableData.map((row, rowIndex) => (
+          <View key={rowIndex} style={styles.row}>
+            {row.map((cell, colIndex) => (
+              <TouchableOpacity
+                key={colIndex}
+                style={styles.cell}
+                onPress={() => handleCellPress(rowIndex, colIndex)}>
+                <Text style={styles.cellText}>{cell || '-'}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
-        )}
-      />
+        ))}
+      </View>
 
-      <TouchableOpacity style={styles.addButton} onPress={addRow}>
-        <Text style={styles.addButtonText}>➕ Add Field</Text>
-      </TouchableOpacity>
+      <Modal
+  visible={modalVisible}
+  animationType="slide"
+  transparent
+  onRequestClose={() => setModalVisible(false)}>
+  <View style={styles.modalContainer}>
+    <View style={styles.modalBox}>
+      <Text style={styles.modalTitle}>Choose Input Method</Text>
 
-      <View style={styles.buttons}>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => Alert.alert('Coming Soon', 'Camera integration here')}
-        >
-          <Text style={styles.actionText}>📸 Capture Image</Text>
+      <View style={styles.iconRow}>
+        <TouchableOpacity style={styles.iconBtn}>
+          <Ionicons name="camera" size={30} color="#1c3a63" />
+          <Text>Camera</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => Alert.alert('Coming Soon', 'Voice-to-text here')}
-        >
-          <Text style={styles.actionText}>🎤 Voice Input</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveText}>💾 Save & Continue</Text>
+        <TouchableOpacity style={styles.iconBtn}>
+          <Ionicons name="mic" size={30} color="#1c3a63" />
+          <Text>Voice</Text>
         </TouchableOpacity>
       </View>
+
+      <TextInput
+        style={styles.inputField}
+        placeholder="Enter value manually"
+        value={manualInput}
+        onChangeText={setManualInput}
+      />
+
+      <View style={styles.modalButtons}>
+        <Pressable
+          style={[styles.button, styles.saveBtn]}
+          onPress={() => handleInput(manualInput)}>
+          <Text style={styles.btnText}>Save</Text>
+        </Pressable>
+
+        <Pressable
+          style={[styles.button, styles.cancelBtn]}
+          onPress={() => {
+            // Clear the selected cell value
+            const updatedData = [...tableData];
+            updatedData[selectedCell.row][selectedCell.col] = '';
+            setTableData(updatedData);
+            setModalVisible(false);
+          }}>
+          <Text style={styles.btnText}>Cancel</Text>
+        </Pressable>
+      </View>
     </View>
+  </View>
+</Modal>
+
+    </ScrollView>
   );
 }
+
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: 'rgba(72,79,139,0.05)',
-      padding: 20,
-    },
-    title: {
-      fontSize: 22,
-      fontWeight: 'bold',
-      color: '#1c1c1e',
-      textAlign: 'center',
-      marginBottom: 20,
-    },
-    row: {
-      flexDirection: 'row',
-      marginBottom: 12,
-      alignItems: 'center',
-    },
-    input: {
-      flex: 1,
-      backgroundColor: '#f5f5f5',
-      paddingVertical: 12,
-      paddingHorizontal: 10,
-      borderRadius: 10,
-      fontSize: 16,
-      borderWidth: 1,
-      borderColor: '#ccc',
-      marginRight: 8,
-    },
-    remove: {
-      fontSize: 20,
-      color: 'red',
-    },
-    addButton: {
-      backgroundColor: '#1c3a63',
-      paddingVertical: 12,
-      borderRadius: 10,
-      marginTop: 10,
-      alignItems: 'center',
-    },
-    addButtonText: {
-      color: '#fff',
-      fontWeight: 'bold',
-      fontSize: 16,
-    },
-    buttons: {
-      marginTop: 24,
-      gap: 12,
-    },
-    actionButton: {
-      backgroundColor: '#f0f0f0',
-      paddingVertical: 14,
-      borderRadius: 10,
-      alignItems: 'center',
-    },
-    actionText: {
-      fontSize: 16,
-      color: '#1c1c1e',
-      fontWeight: '600',
-    },
-    saveButton: {
-      backgroundColor: '#1c3a63',
-      paddingVertical: 14,
-      borderRadius: 10,
-      alignItems: 'center',
-    },
-    saveText: {
-      color: '#fff',
-      fontSize: 16,
-      fontWeight: 'bold',
-    },
-  });
+  container: {
+    padding: 20,
+    backgroundColor: '#f8f9fa',
+    flexGrow: 1,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  table: {
+    borderWidth: 1,
+    borderColor: '#1c3a63',
+  },
+  row: {
+    flexDirection: 'row',
+  },
+  cell: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#1c3a63',
+    padding: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 50,
+  },
+  cellText: {
+    fontSize: 14,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalBox: {
+    backgroundColor: '#fff',
+    margin: 30,
+    padding: 20,
+    borderRadius: 10,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  iconRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 10,
+  },
+  iconBtn: {
+    alignItems: 'center',
+  },
+  inputField: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    marginVertical: 10,
+    borderRadius: 8,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  button: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginHorizontal: 5,
+  },
+  saveBtn: {
+    backgroundColor: '#1c3a63',
+  },
+  cancelBtn: {
+    backgroundColor: '#ccc',
+  },
+  btnText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+});
+
   
 
   
