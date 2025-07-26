@@ -3,195 +3,232 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Modal,
-  Pressable,
+  TouchableOpacity,
 } from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
 
+
 export default function FormBuilderScreen({ route }) {
-  const { formName, columnStructure } = route.params;
+  const { formName } = route.params || { formName: 'Form 1' };
 
-  const [tableData, setTableData] = useState(
-    columnStructure.map(colCount => Array(colCount).fill(''))
-  );
-  const [selectedCell, setSelectedCell] = useState({ row: null, col: null });
-  const [modalVisible, setModalVisible] = useState(false);
-  const [manualInput, setManualInput] = useState('');
+  const [formData, setFormData] = useState({
+    partNumber: '',
+    partName: '',
+    serialNumber: '',
+    fairId: '',
+    customerPartNumber: '',
+    partRevisionLevel: '',
+    drawingNumber: '',
+    drawingRevLevel: '',
+    additionalChanges: '',
+    mfgProcessRef: '',
+    orgName: '',
+    supplierCode: '',
+    purchaseOrder: '',
+    detail: '',
+    fullFAI: false,
+    partialFAI: false,
+    baselinePartNumber: '',
+    faiReason: '',
+    processChange: '',
+    partList: '',
+    nonConformance: false,
+    fairVerifiedBy: '',
+    dateVerified: '',
+    reviewedBy: '',
+    reviewedDate: '',
+    approvedBy: '',
+    approvedDate: '',
+    comments: '',
+  });
 
-  const handleCellPress = (rowIdx, colIdx) => {
-    setSelectedCell({ row: rowIdx, col: colIdx });
-    setManualInput(tableData[rowIdx][colIdx]);
-    setModalVisible(true);
-  };
-
-  const handleInput = value => {
-    const newData = [...tableData];
-    newData[selectedCell.row][selectedCell.col] = value;
-    setTableData(newData);
-    setModalVisible(false);
+  const handleChange = (field, value) => {
+    setFormData({ ...formData, [field]: value });
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>{formName}</Text>
+    <ScrollView style={styles.container}>
+      <Text style={styles.heading}>{formName}</Text>
 
-      <View style={styles.table}>
-        {tableData.map((row, rowIndex) => (
-          <View key={rowIndex} style={styles.row}>
-            {row.map((cell, colIndex) => (
-              <TouchableOpacity
-                key={colIndex}
-                style={styles.cell}
-                onPress={() => handleCellPress(rowIndex, colIndex)}>
-                <Text style={styles.cellText}>{cell || '-'}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        ))}
+      {/* Section 1: Basic Info */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>1. Identification</Text>
+        <View style={styles.row}>
+          <Field label="Part Number" value={formData.partNumber} onChange={val => handleChange('partNumber', val)} />
+          <Field label="Part Name" value={formData.partName} onChange={val => handleChange('partName', val)} />
+        </View>
+        <View style={styles.row}>
+          <Field label="Serial Number" value={formData.serialNumber} onChange={val => handleChange('serialNumber', val)} />
+          <Field label="FAIR Identifier" value={formData.fairId} onChange={val => handleChange('fairId', val)} />
+        </View>
+        <View style={styles.row}>
+          <Field label="Customer Part Number" value={formData.customerPartNumber} onChange={val => handleChange('customerPartNumber', val)} />
+          <Field label="Part Revision Level" value={formData.partRevisionLevel} onChange={val => handleChange('partRevisionLevel', val)} />
+        </View>
+        <View style={styles.row}>
+          <Field label="Drawing Number" value={formData.drawingNumber} onChange={val => handleChange('drawingNumber', val)} />
+          <Field label="Drawing Rev Level" value={formData.drawingRevLevel} onChange={val => handleChange('drawingRevLevel', val)} />
+        </View>
+        <Field label="Additional Changes" value={formData.additionalChanges} onChange={val => handleChange('additionalChanges', val)} />
       </View>
 
-      <Modal
-  visible={modalVisible}
-  animationType="slide"
-  transparent
-  onRequestClose={() => setModalVisible(false)}>
-  <View style={styles.modalContainer}>
-    <View style={styles.modalBox}>
-      <Text style={styles.modalTitle}>Choose Input Method</Text>
-
-      <View style={styles.iconRow}>
-        <TouchableOpacity style={styles.iconBtn}>
-          <Ionicons name="camera" size={30} color="#1c3a63" />
-          <Text>Camera</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconBtn}>
-          <Ionicons name="mic" size={30} color="#1c3a63" />
-          <Text>Voice</Text>
-        </TouchableOpacity>
+      {/* Section 2: Organization */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>2. Organization Details</Text>
+        <Field label="Mfg Process Ref" value={formData.mfgProcessRef} onChange={val => handleChange('mfgProcessRef', val)} />
+        <Field label="Organization Name" value={formData.orgName} onChange={val => handleChange('orgName', val)} />
+        <View style={styles.row}>
+          <Field label="Supplier Code" value={formData.supplierCode} onChange={val => handleChange('supplierCode', val)} />
+          <Field label="PO Number" value={formData.purchaseOrder} onChange={val => handleChange('purchaseOrder', val)} />
+        </View>
       </View>
 
-      <TextInput
-        style={styles.inputField}
-        placeholder="Enter value manually"
-        value={manualInput}
-        onChangeText={setManualInput}
-      />
+      {/* Section 3: FAI */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>3. FAI Status</Text>
+        <Field label="Detail" value={formData.detail} onChange={val => handleChange('detail', val)} />
+        <View style={{ flexDirection: 'row', gap: 20 }}>
+          <TouchableOpacity
+            onPress={() => handleChange('fullFAI', !formData.fullFAI)}
+            style={styles.checkboxContainer}
+          >
+            <Ionicons
+              name={formData.fullFAI ? 'checkbox' : 'square-outline'}
+              size={24}
+              color="#1c3a63"
+            />
+            <Text style={styles.checkboxLabel}>Full FAI</Text>
+          </TouchableOpacity>
 
-      <View style={styles.modalButtons}>
-        <Pressable
-          style={[styles.button, styles.saveBtn]}
-          onPress={() => handleInput(manualInput)}>
-          <Text style={styles.btnText}>Save</Text>
-        </Pressable>
+          <TouchableOpacity
+            onPress={() => handleChange('partialFAI', !formData.partialFAI)}
+            style={styles.checkboxContainer}
+          >
+            <Ionicons
+              name={formData.partialFAI ? 'checkbox' : 'square-outline'}
+              size={24}
+              color="#1c3a63"
+            />
+            <Text style={styles.checkboxLabel}>Partial FAI</Text>
+          </TouchableOpacity>
+        </View>
 
-        <Pressable
-          style={[styles.button, styles.cancelBtn]}
-          onPress={() => {
-            // Clear the selected cell value
-            const updatedData = [...tableData];
-            updatedData[selectedCell.row][selectedCell.col] = '';
-            setTableData(updatedData);
-            setModalVisible(false);
-          }}>
-          <Text style={styles.btnText}>Cancel</Text>
-        </Pressable>
+        <Field label="Baseline Part Number" value={formData.baselinePartNumber} onChange={val => handleChange('baselinePartNumber', val)} />
+        <Field label="Reason for FAI" value={formData.faiReason} onChange={val => handleChange('faiReason', val)} />
+        <Field label="Process Change" value={formData.processChange} onChange={val => handleChange('processChange', val)} />
       </View>
-    </View>
-  </View>
-</Modal>
 
+      {/* Section 4: Index */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>4. Index</Text>
+        <Field label="Part List" value={formData.partList} onChange={val => handleChange('partList', val)} />
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 8 }}>
+          <TouchableOpacity
+            onPress={() => handleChange('nonConformance', !formData.nonConformance)}
+            style={styles.checkboxContainer}
+          >
+            <Ionicons
+              name={formData.nonConformance ? 'checkbox' : 'square-outline'}
+              size={24}
+              color="#1c3a63"
+            />
+            <Text style={styles.checkboxLabel}>Contains Documented Non-Conformance</Text>
+          </TouchableOpacity>
+        </View>
+
+      </View>
+
+      {/* Section 5: Sign-Off */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>5. Approval</Text>
+        <View style={styles.row}>
+          <Field label="Verified By" value={formData.fairVerifiedBy} onChange={val => handleChange('fairVerifiedBy', val)} />
+          <Field label="Date" value={formData.dateVerified} onChange={val => handleChange('dateVerified', val)} />
+        </View>
+        <View style={styles.row}>
+          <Field label="Reviewed By" value={formData.reviewedBy} onChange={val => handleChange('reviewedBy', val)} />
+          <Field label="Date" value={formData.reviewedDate} onChange={val => handleChange('reviewedDate', val)} />
+        </View>
+        <View style={styles.row}>
+          <Field label="Approved By" value={formData.approvedBy} onChange={val => handleChange('approvedBy', val)} />
+          <Field label="Date" value={formData.approvedDate} onChange={val => handleChange('approvedDate', val)} />
+        </View>
+        <Field label="Comments" value={formData.comments} onChange={val => handleChange('comments', val)} />
+      </View>
     </ScrollView>
   );
 }
 
+const Field = ({ label, value, onChange }) => (
+  <View style={styles.field}>
+    <Text style={styles.label}>{label}</Text>
+    <TextInput
+      style={styles.input}
+      value={value}
+      onChangeText={onChange}
+      placeholder={label}
+    />
+  </View>
+);
+
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    padding: 16,
     backgroundColor: '#f8f9fa',
-    flexGrow: 1,
   },
-  title: {
+  heading: {
     fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 16,
     textAlign: 'center',
+    color: '#1c3a63',
   },
-  table: {
-    borderWidth: 1,
-    borderColor: '#1c3a63',
+  section: {
+    marginBottom: 24,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+    color: '#1c3a63',
   },
   row: {
     flexDirection: 'row',
-  },
-  cell: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#1c3a63',
-    padding: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 50,
-  },
-  cellText: {
-    fontSize: 14,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalBox: {
-    backgroundColor: '#fff',
-    margin: 30,
-    padding: 20,
-    borderRadius: 10,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  iconRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 10,
-  },
-  iconBtn: {
-    alignItems: 'center',
-  },
-  inputField: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginVertical: 10,
-    borderRadius: 8,
-  },
-  modalButtons: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  button: {
+  field: {
     flex: 1,
-    padding: 12,
-    borderRadius: 8,
+    marginBottom: 12,
+    marginRight: 10,
+  },
+  label: {
+    marginBottom: 4,
+    color: '#333',
+    fontWeight: '500',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#aaa',
+    borderRadius: 6,
+    padding: 8,
+    backgroundColor: '#fff',
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: 5,
   },
-  saveBtn: {
-    backgroundColor: '#1c3a63',
+  checkboxLabel: {
+    marginLeft: 6,
+    fontSize: 14,
+    color: '#333',
   },
-  cancelBtn: {
-    backgroundColor: '#ccc',
-  },
-  btnText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
+  
 });
 
   
