@@ -5,118 +5,192 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
   Alert,
 } from 'react-native';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState(null); // 'employee' or 'manager'
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleLogin = () => {
-    if (!role) {
-      alert('Please select login type (Employee or Manager)');
+    if (!email || !password) {
+      alert('Please fill in all fields');
       return;
     }
 
-    if (email && password) {
-      navigation.navigate('FormSelector');
-    } else {
-      alert('Please enter email and password');
-    }
+    navigation.navigate('FolderUpload');
   };
 
   const handleForgotPassword = () => {
-    if (!role) {
-      alert('Please select login type first.');
-    } else if (role === 'employee') {
-      Alert.alert('Contact your manager to reset your password.');
+    if (email.includes('manager')) {
+      Alert.alert('Reset Password', 'A reset link will be sent to your email.');
     } else {
-      Alert.prompt('Reset Password', 'Enter your registered email:', (inputEmail) => {
-        if (inputEmail) {
-          Alert.alert('Reset link sent to:', inputEmail);
-        }
-      });
+      Alert.alert('Contact Manager', 'Please contact your manager to reset your password.');
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Welcome back!</Text>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <View style={styles.card}>
+        <Text style={styles.title}>Welcome Back</Text>
+        <Text style={styles.subtitle}>Login to your ScanNLog account</Text>
 
-      <View style={styles.roleSelector}>
-        <TouchableOpacity
-          style={[styles.roleButton, role === 'employee' && styles.selected]}
-          onPress={() => setRole('employee')}
-        >
-          <Text style={styles.roleText}>Employee</Text>
+        <TextInput
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          style={styles.input}
+          placeholderTextColor="#888"
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <TextInput
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          style={styles.input}
+          placeholderTextColor="#888"
+          secureTextEntry
+        />
+
+        {/* Remember Me */}
+        <View style={styles.row}>
+          <TouchableOpacity
+            style={styles.checkboxContainer}
+            onPress={() => setRememberMe(!rememberMe)}
+          >
+            <View style={[styles.customCheckbox, rememberMe && styles.checkedBox]} />
+            <Text style={styles.checkboxLabel}>Remember Me</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Login Button */}
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.roleButton, role === 'manager' && styles.selected]}
-          onPress={() => setRole('manager')}
-        >
-          <Text style={styles.roleText}>Manager</Text>
+
+        {/* Forgot Password (moved below login) */}
+        <TouchableOpacity onPress={handleForgotPassword} style={styles.forgotWrapper}>
+          <Text style={styles.forgotText}>Forgot Password?</Text>
         </TouchableOpacity>
+
+        {/* Register Prompt */}
+        <View style={styles.registerPrompt}>
+          <Text style={styles.promptText}>New here?</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+            <Text style={styles.registerLink}> Register</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-
-      <TextInput
-        placeholder="Enter your email"
-        value={email}
-        onChangeText={setEmail}
-        style={styles.input}
-        placeholderTextColor="#888"
-        keyboardType="email-address"
-      />
-      <TextInput
-        placeholder="Enter your password"
-        value={password}
-        onChangeText={setPassword}
-        style={styles.input}
-        secureTextEntry
-        placeholderTextColor="#888"
-      />
-
-      <TouchableOpacity onPress={handleForgotPassword}>
-        <Text style={styles.forgotText}>Forgot Password?</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.footerText}>
-        Don’t have an account?{' '}
-        <Text style={styles.registerLink} onPress={() => navigation.navigate('Register')}>
-          Register Now
-        </Text>
-      </Text>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', paddingHorizontal: 24, backgroundColor: '#fff' },
-  header: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 30 },
-  input: { backgroundColor: '#f5f5f5', padding: 14, borderRadius: 10, fontSize: 16, marginBottom: 14 },
-  button: { backgroundColor: '#1c3a63', padding: 14, borderRadius: 10, alignItems: 'center', marginTop: 10 },
-  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-  footerText: { textAlign: 'center', marginTop: 20, fontSize: 14, color: '#444' },
-  registerLink: { color: '#1c3a63', fontWeight: '600' },
-  forgotText: { color: '#1c3a63', textAlign: 'right', marginBottom: 12 },
-  roleSelector: { flexDirection: 'row', justifyContent: 'center', marginBottom: 20 },
-  roleButton: {
-    padding: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    marginHorizontal: 8,
-    paddingHorizontal: 16,
+  container: {
+    flex: 1,
+    backgroundColor: '#eaf4fc',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
   },
-  selected: {
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#1c3a63',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#555',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  input: {
+    backgroundColor: '#f2f2f2',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    fontSize: 16,
+    marginBottom: 16,
+    color: '#000',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  customCheckbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: '#1c3a63',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  checkedBox: {
     backgroundColor: '#1c3a63',
   },
-  roleText: {
-    color: '#1c1c1e',
+  checkboxLabel: {
+    fontSize: 14,
+    color: '#333',
+  },
+  forgotWrapper: {
+    marginTop: 12,
+    alignItems: 'center',
+  },
+  forgotText: {
+    fontSize: 14,
+    color: '#1c3a63',
+    fontWeight: '600',
+  },
+  button: {
+    backgroundColor: '#1c3a63',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  registerPrompt: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  promptText: {
+    fontSize: 14,
+    color: '#444',
+  },
+  registerLink: {
+    fontSize: 14,
+    color: '#1c3a63',
+    fontWeight: 'bold',
   },
 });
   

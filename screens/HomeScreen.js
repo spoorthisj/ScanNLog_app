@@ -18,9 +18,9 @@ export default function HomeScreen({ navigation }) {
       useNativeDriver: true,
     }).start();
 
-    // Navigate to RoleSelection after 3.5 seconds
+    // Navigate to Login after 3.5 seconds
     const timeout = setTimeout(() => {
-      navigation.replace('LoginScreen'); // 👈 updated from "Login" to "RoleSelection"
+      navigation.replace('Login'); // ✅ Navigate to Login screen after splash
     }, 3500);
 
     return () => clearTimeout(timeout);
