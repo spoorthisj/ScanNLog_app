@@ -1,219 +1,217 @@
-// screens/Form2SetupScreen.js
 import React, { useState } from 'react';
 import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
+  ScrollView,
   StyleSheet,
-  FlatList,
-  Pressable,
+  TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function Form2SetupScreen({ navigation }) {
-  const [rows, setRows] = useState([{ title: '', columns: '' }]);
-  const [showTooltip, setShowTooltip] = useState(false);
+export default function Form2Screen() {
+  const [formData, setFormData] = useState({
+    partNumber: '',
+    partName: '',
+    serialNumber: '',
+    fairIdentifier: '',
+    customerPartNumber: '',
+    materialProcess: '',
+    specNumber: '',
+    code: '',
+    supplier: '',
+    customerApproval: '',
+    certificateOfConformance: '',
+    materials: '',
+    referenceDoc: '',
+    inspections: '', 
+    functionalTestProc: '',
+    acceptanceReportNum: '',
+    comments: '',
+  });
 
-  const addRow = () => {
-    setRows([...rows, { title: '', columns: '' }]);
+  const handleChange = (field, value) => {
+    setFormData({ ...formData, [field]: value });
   };
 
-  const handleChange = (index, key, value) => {
-    const updatedRows = [...rows];
-    updatedRows[index][key] = value;
-    setRows(updatedRows);
+  const Field = ({ label, value, onChange }) => {
+    const cleanedPlaceholder = label.replace(/^\d+\.\s*/, ''); // removes "1. ", "2. ", etc.
+    return (
+      <View style={styles.field}>
+        <Text style={styles.label}>{label}</Text>
+        <TextInput
+          style={styles.input}
+          value={value}
+          onChangeText={onChange}
+          placeholder={cleanedPlaceholder}
+        />
+      </View>
+    );
   };
-
-  const generateForm = () => {
-    const columnStructure = rows.map(row => ({
-      title: row.title,
-      columns: parseInt(row.columns) || 0,
-    }));
-    navigation.navigate('FormBuilder', {
-      formName: 'Form 2',
-      columnStructure,
-    });
-  };
+  
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.headerRow}>
-        <Text style={styles.title}>Setup for Form 2</Text>
-        <Pressable onPress={() => setShowTooltip(!showTooltip)}>
-          <Ionicons name="information-circle-outline" size={26} color="#1c3a63" />
-        </Pressable>
+    <ScrollView style={styles.container}>
+      {/* Header Info */}
+      
+      <Text style={styles.title}>Form 2</Text>
+
+
+      {/* Part Info Section */}
+      <View style={styles.row}>
+        <Field label="1. Part Number" value={formData.partNumber} onChange={(val) => handleChange('partNumber', val)} />
+        <Field label="2. Part Name" value={formData.partName} onChange={(val) => handleChange('partName', val)} />
       </View>
+      <View style={styles.row}>
+        <Field label="3. Serial Number" value={formData.serialNumber} onChange={(val) => handleChange('serialNumber', val)} />
+        <Field label="4. FAIR Identifier" value={formData.fairIdentifier} onChange={(val) => handleChange('fairIdentifier', val)} />
+      </View>
+      
 
-      {/* Tooltip */}
-      {showTooltip && (
-        <View style={styles.tooltipContainer}>
-          <View style={styles.tooltip}>
-            <Text style={styles.tooltipTitle}>🛠 Form 2 – Product Accountability</Text>
-            <Text style={styles.tooltipText}>
-              Lists materials, special processes, and specifications used in manufacturing the part.
-            </Text>
-            <Text style={styles.tooltipNote}>🧾 “What materials/processes were used?”</Text>
-          </View>
-          <View style={styles.tooltipPointer} />
-        </View>
-      )}
+      {/* Materials / Processes */}
+      <Text style={styles.sectionTitle}>Material/Processes – Rows 5 to 10</Text>
+      <Field label="5. Material/Process Name" value={formData.materialProcess} onChange={(val) => handleChange('materialProcess', val)} />
+      <Field label="6. Specification Number" value={formData.specNumber} onChange={(val) => handleChange('specNumber', val)} />
+      <Field label="7. Code" value={formData.code} onChange={(val) => handleChange('code', val)} />
+      <Field label="8. Supplier" value={formData.supplier} onChange={(val) => handleChange('supplier', val)} />
+      <Field label="9. Customer Approval Verification" value={formData.customerApproval} onChange={(val) => handleChange('customerApproval', val)} />
+      <Field label="10. Certificate of Conformance Number" value={formData.certificateOfConformance} onChange={(val) => handleChange('certificateOfConformance', val)} /> 
+      <Field label="Materials" value={formData.materials} onChange={(val) => handleChange('materials', val)}/>
 
-      {/* Row Inputs */}
-      <FlatList
-        data={rows}
-        keyExtractor={(_, index) => index.toString()}
-        renderItem={({ item, index }) => (
-          <View style={styles.rowInputContainer}>
-            <View style={styles.rowLabelContainer}>
-              <Text style={styles.rowLabel}>Row {index + 1}</Text>
-            </View>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Row title"
-              value={item.title}
-              onChangeText={(text) => handleChange(index, 'title', text)}
-            />
-            <TextInput
-              style={styles.textInput}
-              placeholder="No. of columns"
-              keyboardType="numeric"
-              value={item.columns}
-              onChangeText={(text) => handleChange(index, 'columns', text)}
-            />
-          </View>
-        )}
+
+      <View style={styles.section}>
+      <Text style={styles.sectionTitle}>Conatils No Materials </Text>
+  <Text style={styles.sectionTitle}>Processes</Text>
+
+  {/* Row 1: Process Fields */}
+  <Field label="FAIR #" value={formData.fairNumber} onChange={val => handleChange('fairNumber', val)} />
+  <Field label="Process Name" value={formData.processName} onChange={val => handleChange('processName', val)} />
+  <Field label="Specification Number" value={formData.specNumber} onChange={val => handleChange('specNumber', val)} />
+  <Field label="Code" value={formData.processCode} onChange={val => handleChange('processCode', val)} />
+  <Field label="Supplier Details" value={formData.supplierDetails} onChange={val => handleChange('supplierDetails', val)} />
+
+  {/* Approval Yes/No */}
+  <Text style={styles.label}>Customer Approval Verification:</Text>
+  <View style={styles.radioGroup}>
+    <TouchableOpacity
+      style={styles.radioButton}
+      onPress={() => handleChange('customerApproved', true)}
+    >
+      <Ionicons
+        name={formData.customerApproved ? 'radio-button-on' : 'radio-button-off'}
+        size={20}
+        color="#1c3a63"
       />
+      <Text style={styles.radioLabel}>Yes</Text>
+    </TouchableOpacity>
+    <TouchableOpacity
+      style={styles.radioButton}
+      onPress={() => handleChange('customerApproved', false)}
+    >
+      <Ionicons
+        name={!formData.customerApproved ? 'radio-button-on' : 'radio-button-off'}
+        size={20}
+        color="#1c3a63"
+      />
+      <Text style={styles.radioLabel}>No</Text>
+    </TouchableOpacity>
+  </View>
 
-      {/* Buttons */}
-      <View style={styles.buttonRow}>
-        <TouchableOpacity style={styles.addButton} onPress={addRow}>
-          <Text style={styles.buttonText}>+ Add Row</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.createButton} onPress={generateForm}>
-          <Text style={styles.buttonText}>Create Form</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+  <Field label="Certificate Number" value={formData.certificateNumber} onChange={val => handleChange('certificateNumber', val)} />
+  <Field label="Reference Document" value={formData.referenceDocument} onChange={val => handleChange('referenceDocument', val)} />
+</View>
+<Field label="Inspections" value={formData.inspections} onChange={val => handleChange('inspections', val)} />
+
+
+
+      {/* Functional Test & Comments */}
+      <Field label="11. Functional Test Procedure Number" value={formData.functionalTestProc} onChange={(val) => handleChange('functionalTestProc', val)} />
+      <Field label="12. Acceptance Report Number" value={formData.acceptanceReportNum} onChange={(val) => handleChange('acceptanceReportNum', val)} />
+      <Field label="Reference Document" value={formData.referenceDocument} onChange={val => handleChange('referenceDocument', val)} />
+      <Text style={styles.sectionTitle}>Contains No Functional Tests and Acceptance Reports </Text>
+      <Field label="13. Comments" value={formData.comments} onChange={(val) => handleChange('comments', val)} />
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#f4f6fc',
-    padding: 20,
+    padding: 16,
+    backgroundColor: '#f2f2f2',
   },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
+  headerText: {
+    fontSize: 13,
+    color: '#444',
+    marginBottom: 2,
   },
   title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#1c3a63',
-  },
-  tooltipContainer: {
-    alignItems: 'flex-start',
-    marginBottom: 10,
-  },
-  tooltip: {
-    backgroundColor: '#fffbea',
-    borderColor: '#f4d700',
-    borderWidth: 1.5,
-    borderRadius: 8,
-    padding: 12,
-    maxWidth: '100%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  tooltipTitle: {
-    fontWeight: 'bold',
-    fontSize: 15,
-    marginBottom: 4,
-    color: '#1c3a63',
-  },
-  tooltipText: {
-    fontSize: 14,
-    marginBottom: 4,
-    color: '#333',
-  },
-  tooltipNote: {
-    fontStyle: 'italic',
-    color: '#555',
-    fontSize: 13,
-  },
-  tooltipPointer: {
-    width: 0,
-    height: 0,
-    borderLeftWidth: 10,
-    borderRightWidth: 10,
-    borderBottomWidth: 12,
-    borderStyle: 'solid',
-    backgroundColor: 'transparent',
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderBottomColor: '#f4d700',
-    transform: [{ rotate: '180deg' }],
-    marginLeft: 15,
-    marginTop: -1,
-  },
-  rowInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 14,
-    gap: 10,
-  },
-  rowLabelContainer: {
-    width: 70,
-  },
-  rowLabel: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: 'bold',
     color: '#1c3a63',
+    marginVertical: 8,
   },
-  textInput: {
-    flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+  subtitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 16,
   },
-  buttonRow: {
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1c3a63',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  
+  row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 30,
   },
-  addButton: {
-    backgroundColor: '#1c3a63',
+  field: {
     flex: 1,
-    paddingVertical: 14,
-    borderRadius: 10,
+    marginBottom: 12,
     marginRight: 10,
+  },
+  label: {
+    fontSize: 13,
+    marginBottom: 4,
+    color: '#333',
+    fontWeight: '500',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#aaa',
+    borderRadius: 6,
+    padding: 8,
+    backgroundColor: '#fff',
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginVertical: 10,
+    color: '#1c3a63',
+  },
+  radioGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 20, // optional spacing between Yes and No
+    marginVertical: 8,
+  },
+  radioButton: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
-  createButton: {
-    backgroundColor: '#4185a3',
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 10,
-    marginLeft: 10,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
+  
+  
+  noteText: {
+    fontSize: 12,
+    fontStyle: 'italic',
+    marginVertical: 4,
+    color: '#888',
   },
 });
+
+
 
 
 

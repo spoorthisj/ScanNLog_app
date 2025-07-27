@@ -2,7 +2,9 @@
   "expo": {
     "name": "ScanNLog",
     "slug": "ScanNLog",
-    "permissions": ["CAMERA"],
+    "permissions": [
+      "CAMERA"
+    ],
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
@@ -14,14 +16,16 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.ScanNLog"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.anonymous.ScanNLog"
     },
     "web": {
       "favicon": "./assets/favicon.png"

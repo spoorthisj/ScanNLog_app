@@ -3,210 +3,224 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
+  ScrollView,
   StyleSheet,
-  FlatList,
-  Pressable,
+  TouchableOpacity,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 
-export default function Form3SetupScreen({ navigation }) {
-  const [rows, setRows] = useState([{ title: '', columns: '' }]);
-  const [showTooltip, setShowTooltip] = useState(false);
+export default function Form3Screen() {
+  const [formData, setFormData] = useState({
+    partNumber: '',
+    partName: '',
+    serialNumber: '',
+    fairIdentifier: '',
+  });
 
-  const addRow = () => {
-    setRows([...rows, { title: '', columns: '' }]);
+  const [characteristics, setCharacteristics] = useState([
+    {
+      number: '',
+      location: '',
+      accountability: '',
+      requirement: '',
+      result: '',
+      tooling: '',
+      nonConformance: '',
+      comments: '',
+    },
+  ]);
+
+  const handleChange = (field, value) => {
+    setFormData({ ...formData, [field]: value });
   };
 
-  const handleInputChange = (index, field, value) => {
-    const updatedRows = [...rows];
-    updatedRows[index][field] = value;
-    setRows(updatedRows);
+  const handleCharacteristicChange = (index, field, value) => {
+    const updated = [...characteristics];
+    updated[index][field] = value;
+    setCharacteristics(updated);
   };
 
-  const generateForm = () => {
-    const columnStructure = rows.map(row => ({
-      title: row.title || `Row ${rows.indexOf(row) + 1}`,
-      columns: parseInt(row.columns) || 0,
-    }));
-    navigation.navigate('FormBuilder', {
-      formName: 'Form 3',
-      columnStructure,
-    });
+  const addCharacteristicRow = () => {
+    setCharacteristics([
+      ...characteristics,
+      {
+        number: '',
+        location: '',
+        accountability: '',
+        requirement: '',
+        result: '',
+        tooling: '',
+        nonConformance: '',
+        comments: '',
+      },
+    ]);
   };
+
+  const Field = ({ label, value, onChange }) => (
+    <View style={styles.field}>
+      <Text style={styles.label}>{label}</Text>
+      <TextInput
+        style={styles.input}
+        value={value}
+        onChangeText={onChange}
+        placeholder=""
+      />
+    </View>
+  );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerRow}>
-        <Text style={styles.title}>Setup for Form 3</Text>
-        <Pressable onPress={() => setShowTooltip(!showTooltip)}>
-          <Ionicons name="information-circle-outline" size={26} color="#1c3a63" />
-        </Pressable>
+    <ScrollView style={styles.container}>
+      <Text style={styles.heading}>Form 3</Text>
+
+      {/* Basic Info */}
+      <View style={styles.row}>
+        <Field label="1. Part Number" value={formData.partNumber} onChange={(val) => handleChange('partNumber', val)} />
+        <Field label="2. Part Name" value={formData.partName} onChange={(val) => handleChange('partName', val)} />
+      </View>
+      <View style={styles.row}>
+        <Field label="3. Serial Number" value={formData.serialNumber} onChange={(val) => handleChange('serialNumber', val)} />
+        <Field label="4. FAIR Identifier" value={formData.fairIdentifier} onChange={(val) => handleChange('fairIdentifier', val)} />
       </View>
 
-      {showTooltip && (
-        <View style={styles.tooltipContainer}>
-          <View style={styles.tooltip}>
-            <Text style={styles.tooltipTitle}>📏 Form 3 – Characteristic Accountability</Text>
-            <Text style={styles.tooltipText}>
-              Documents actual measured values for each design characteristic on the drawing.
-            </Text>
-            <Text style={styles.tooltipNote}>📐 “Does the part meet all drawing specs?”</Text>
-          </View>
-          <View style={styles.tooltipPointer} />
-        </View>
-      )}
+      <Text style={styles.sectionTitle}>Characteristic Accountability, Verification, and Compatibility Evaluation</Text>
 
-      <FlatList
-        data={rows}
-        keyExtractor={(_, index) => index.toString()}
-        renderItem={({ item, index }) => (
-          <View style={styles.row}>
-            <Text style={styles.label}>{`Row ${index + 1}`}</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Row title"
-              value={item.title}
-              onChangeText={text => handleInputChange(index, 'title', text)}
-            />
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              placeholder="No. of columns"
-              value={item.columns}
-              onChangeText={text => handleInputChange(index, 'columns', text)}
-            />
-          </View>
-        )}
+      {/* Dynamic Characteristic Rows */}
+      {characteristics.map((char, index) => (
+  <View key={index} style={styles.characteristicBlock}>
+    <Text style={styles.subheading}>Characteristic Row {index + 1}</Text>
+
+    {/* Characteristic Accountability Section */}
+    <Text style={styles.sectionTitle}>Characteristic Accountability</Text>
+    <View style={styles.row}>
+      <Field
+        label="5. Characteristic No."
+        value={char.number}
+        onChange={(val) => handleCharacteristicChange(index, 'number', val)}
       />
-
-      <View style={styles.buttonRow}>
-        <TouchableOpacity style={styles.addButton} onPress={addRow}>
-          <Text style={styles.buttonText}>+ Add Row</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.createButton} onPress={generateForm}>
-          <Text style={styles.buttonText}>Create Form</Text>
-        </TouchableOpacity>
-      </View>
+      <Field
+        label="6. Reference Location"
+        value={char.location}
+        onChange={(val) => handleCharacteristicChange(index, 'location', val)}
+      />
     </View>
+    <Field
+      label="7. Characteristic Accountability"
+      value={char.accountability}
+      onChange={(val) => handleCharacteristicChange(index, 'accountability', val)}
+    />
+    <Field
+      label="8. Requirement"
+      value={char.requirement}
+      onChange={(val) => handleCharacteristicChange(index, 'requirement', val)}
+    />
+
+    {/* Inspection / Test Results Section */}
+    <Text style={styles.sectionTitle}>Inspection / Test Results</Text>
+    <Field
+      label="9. Result"
+      value={char.result}
+      onChange={(val) => handleCharacteristicChange(index, 'result', val)}
+    />
+    <Field
+      label="10. Designed / Qualified Tooling"
+      value={char.tooling}
+      onChange={(val) => handleCharacteristicChange(index, 'tooling', val)}
+    />
+    <Field
+      label="11. Non-Conformance Number"
+      value={char.nonConformance}
+      onChange={(val) => handleCharacteristicChange(index, 'nonConformance', val)}
+    />
+    <Field
+      label="12. Additional Data / Comments"
+      value={char.comments}
+      onChange={(val) => handleCharacteristicChange(index, 'comments', val)}
+    />
+  </View>
+))}
+
+
+      <TouchableOpacity onPress={addCharacteristicRow} style={styles.addButton}>
+        <Text style={styles.addButtonText}>+ Add Characteristic Row</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#f4f6fc',
-    padding: 20,
+    padding: 16,
+    backgroundColor: '#f2f2f2',
   },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 22,
+  heading: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#1c3a63',
-    marginBottom: 20,
+    textAlign: 'center',
+    marginBottom: 16,
   },
-  tooltipContainer: {
-    alignItems: 'flex-start',
-    marginBottom: 10,
-    marginTop: -10,
-  },
-  tooltip: {
-    backgroundColor: '#fffbea',
-    borderColor: '#f4d700',
-    borderWidth: 1.5,
-    borderRadius: 8,
-    padding: 12,
-    maxWidth: '100%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  tooltipTitle: {
-    fontWeight: 'bold',
-    fontSize: 15,
-    marginBottom: 4,
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
     color: '#1c3a63',
+    marginVertical: 12,
   },
-  tooltipText: {
+  subheading: {
     fontSize: 14,
-    marginBottom: 4,
+    fontWeight: '600',
+    marginBottom: 8,
     color: '#333',
-  },
-  tooltipNote: {
-    fontStyle: 'italic',
-    color: '#555',
-    fontSize: 13,
-  },
-  tooltipPointer: {
-    width: 0,
-    height: 0,
-    borderLeftWidth: 10,
-    borderRightWidth: 10,
-    borderBottomWidth: 12,
-    borderStyle: 'solid',
-    backgroundColor: 'transparent',
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderBottomColor: '#f4d700',
-    transform: [{ rotate: '180deg' }],
-    marginLeft: 15,
-    marginTop: -1,
   },
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  field: {
+    flex: 1,
     marginBottom: 12,
-    paddingHorizontal: 5,
   },
   label: {
-    fontSize: 15,
-    width: 65,
-    color: '#1c3a63',
-    fontWeight: '600',
+    fontSize: 13,
+    marginBottom: 4,
+    color: '#333',
+    fontWeight: '500',
   },
   input: {
-    flex: 1,
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    marginLeft: 5,
+    borderColor: '#aaa',
+    borderRadius: 6,
+    padding: 8,
     backgroundColor: '#fff',
   },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 30,
+  characteristicBlock: {
+    padding: 12,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginTop: 12,
+    marginBottom: 8,
+    color: '#1c3a63',
+  },
+  
   addButton: {
     backgroundColor: '#1c3a63',
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 10,
-    marginRight: 10,
+    padding: 12,
+    borderRadius: 8,
     alignItems: 'center',
+    marginVertical: 20,
   },
-  createButton: {
-    backgroundColor: '#4185a3',
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 10,
-    marginLeft: 10,
-    alignItems: 'center',
-  },
-  buttonText: {
+  addButtonText: {
     color: '#fff',
-    fontWeight: 'bold',
     fontSize: 16,
+    fontWeight: '600',
   },
 });
+
 
 
